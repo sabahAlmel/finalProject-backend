@@ -9,7 +9,7 @@ import { authenticate } from "../middlewares/auth.middelwares.js";
 
 const userRouter = express.Router();
 
-userRouter.get("/", getUsers);
+userRouter.get("/getall", getUsers);
 userRouter.put("/update/:userId", authenticate, updateUser);
 userRouter.delete("/delete/:userId", authenticate, deleteUser);
 userRouter.get("/readOne", authenticate, getUser);

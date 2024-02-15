@@ -74,11 +74,6 @@ export const deleteUser = async (req, res) => {
 };
 
 export const getUsers = async (req, res) => {
-  if (req.user.role !== "admin") {
-    return res
-      .status(403)
-      .json({ message: "You are not allowed to see all users" });
-  }
   try {
     const startIndex = parseInt(req.query.startIndex) || 0;
     const limit = parseInt(req.query.limit) || 9;

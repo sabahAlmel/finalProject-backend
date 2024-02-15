@@ -14,7 +14,7 @@ const postRouter = express.Router();
 postRouter.get("/getByUser/:userId", authenticate, getPostByUserId);
 postRouter.put("/recommended/postId", authenticate, recommendedPosts);
 postRouter.post("/create", authenticate, create);
-postRouter.get("/getposts", getposts);
+postRouter.get("/getall", getposts);
 postRouter.delete("/deletepost/:postId", authenticate, deletepost);
 postRouter.put("/updatepost/:postId", authenticate, updatepost);
 

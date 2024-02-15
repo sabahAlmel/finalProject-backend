@@ -8,6 +8,8 @@ export const create = async (req, res) => {
   }
   const newPost = new Post({
     ...req.body,
+    categoryId: req.body.categoryId || null,
+    subCategoryId: req.body.subCategoryId || null,
     userId: req.user.id,
   });
   try {
@@ -25,7 +27,18 @@ export const getposts = async (req, res) => {
     const startIndex = parseInt(req.query.startIndex) || 0;
     const limit = parseInt(req.query.limit) || 9;
     const sortDirection = req.query.order === "asc" ? 1 : -1;
-    const posts = await Post.find()
+    const posts = await Post.find({
+      ...(req.query.userId && { userId: req.query.userId }),
+      ...(req.query.category && { category: req.query.category }),
+      ...(req.query.slug && { slug: req.query.slug }),
+      ...(req.query.postId && { _id: req.query.postId }),
+      ...(req.query.searchTerm && {
+        $or: [
+          { title: { $regex: req.query.searchTerm, $options: "i" } },
+          { content: { $regex: req.query.searchTerm, $options: "i" } },
+        ],
+      }),
+    })
       .populate("subCategoryId")
       .populate("categoryId")
       .populate("userId")
@@ -60,7 +73,10 @@ export const getposts = async (req, res) => {
 };
 
 export const deletepost = async (req, res) => {
-  if (req.user.role !== "admin" || req.user.id !== req.params.userId) {
+  const post = await Post.find({ _id: req.params.postId });
+  let userId = post[0].userId._id;
+  userId = userId.toString();
+  if (req.user.role !== "admin" && req.user.id.toString() !== userId) {
     return res
       .status(403)
       .json({ message: "You are not allowed to delete this post" });
@@ -76,7 +92,10 @@ export const deletepost = async (req, res) => {
 };
 
 export const updatepost = async (req, res) => {
-  if (req.user.role !== "amdin" || req.user.id !== req.params.userId) {
+  const post = await Post.find({ _id: req.params.postId });
+  let userId = post[0].userId._id;
+  userId = userId.toString();
+  if (req.user.role !== "admin" || req.user.id.toString() !== userId) {
     return res
       .status(403)
       .json({ message: "You are not allowed to update this post" });
@@ -88,7 +107,8 @@ export const updatepost = async (req, res) => {
         $set: {
           title: req.body.title,
           description: req.body.description,
-          category: req.body.category,
+          categoryId: req.body.categoryId,
+          subCategoryId: req.body.subCategoryId,
           image: req.body.image,
         },
       },
@@ -110,8 +130,12 @@ export const getPostByUserId = async (req, res) => {
         .status(403)
         .json({ message: "You Are not authorized to complete this action" });
     }
-    let posts = await Post.find({ userId }).sort({ createdAt: -1 });
-    return res.status(200).json({ posts });
+    let posts = await Post.find({ userId })
+      .sort({ createdAt: -1 })
+      .populate("subCategoryId")
+      .populate("categoryId")
+      .populate("userId");
+    return res.status(200).json(posts);
   } catch (error) {
     const statusCode = error.statusCode || 500;
     const message = error.message || "Internal Server Error";
