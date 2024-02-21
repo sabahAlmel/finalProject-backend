@@ -12,6 +12,6 @@ const userRouter = express.Router();
 userRouter.get("/getall", getUsers);
 userRouter.put("/update/:userId", authenticate, updateUser);
 userRouter.delete("/delete/:userId", authenticate, deleteUser);
-userRouter.get("/readOne", authenticate, getUser);
+userRouter.get("/readOne/:userId", getUser);
 
 export { userRouter };

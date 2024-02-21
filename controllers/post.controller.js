@@ -1,4 +1,5 @@
 import Post from "../models/post.model.js";
+import SubCategory from "../models/subcategory.model.js";
 
 export const create = async (req, res) => {
   if (!req.body.title || !req.body.description) {
@@ -29,7 +30,8 @@ export const getposts = async (req, res) => {
     const sortDirection = req.query.order === "asc" ? 1 : -1;
     const posts = await Post.find({
       ...(req.query.userId && { userId: req.query.userId }),
-      ...(req.query.category && { category: req.query.category }),
+      ...(req.query.category && { categoryId: req.query.category }),
+      ...(req.query.subcategory && { subCategoryId: req.query.category }),
       ...(req.query.slug && { slug: req.query.slug }),
       ...(req.query.postId && { _id: req.query.postId }),
       ...(req.query.searchTerm && {
@@ -149,7 +151,7 @@ export const recommendedPosts = async (req, res) => {
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
     }
-    const userIndex = post.nb.indexOf(req.user.id);
+    const userIndex = post.people.indexOf(req.user.id);
     if (userIndex === -1) {
       post.nbOfRecommendation += 1;
       post.people.push(req.user.id);
@@ -159,6 +161,25 @@ export const recommendedPosts = async (req, res) => {
     }
     await post.save();
     return res.status(200).json(post);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    const message = error.message || "Internal Server Error";
+    return res.status(statusCode).json({ message: message });
+  }
+};
+
+export const recommendedBySubCategories = async (req, res) => {
+  try {
+    const { subCategoryName, limit } = req.query;
+
+    const subCategory = await SubCategory.find({ name: subCategoryName });
+    const subCategoryId = subCategory[0]._id;
+    const mostRecommendedPosts = await Post.find({
+      subCategoryId: subCategoryId,
+    })
+      .sort({ nbOfRecommendation: -1 })
+      .limit(parseInt(limit));
+    return res.status(200).json(mostRecommendedPosts);
   } catch (error) {
     const statusCode = error.statusCode || 500;
     const message = error.message || "Internal Server Error";

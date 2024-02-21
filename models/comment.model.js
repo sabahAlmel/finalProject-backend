@@ -12,6 +12,7 @@ const CommmentSchema = new mongoose.Schema(
     },
     numberOfLikes: {
       type: Number,
+      default: 0,
     },
     postId: {
       type: mongoose.Schema.Types.ObjectId,

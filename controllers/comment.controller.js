@@ -27,9 +27,11 @@ export const createComment = async (req, res) => {
 
 export const getPostComments = async (req, res) => {
   try {
-    const comments = await Comment.find({ postId: req.params.postId }).sort({
-      createdAt: -1,
-    });
+    const comments = await Comment.find({ postId: req.params.postId })
+      .populate("postId")
+      .sort({
+        createdAt: -1,
+      });
     return res.status(200).json(comments);
   } catch (error) {
     const statusCode = error.statusCode || 500;
@@ -67,7 +69,7 @@ export const editComment = async (req, res) => {
     if (!comment) {
       return res.status(404).json({ message: "Comment not found" });
     }
-    if (comment.userId !== req.user.id) {
+    if (comment.userId.toString() !== req.user.id) {
       return res
         .status(403)
         .json({ message: "You are not allowed to edit this comment" });
@@ -114,6 +116,8 @@ export const getcomments = async (req, res) => {
     const limit = parseInt(req.query.limit) || 9;
     const sortDirection = req.query.sort === "desc" ? -1 : 1;
     const comments = await Comment.find()
+      .populate("postId")
+      .populate("userId")
       .sort({ createdAt: sortDirection })
       .skip(startIndex)
       .limit(limit);
