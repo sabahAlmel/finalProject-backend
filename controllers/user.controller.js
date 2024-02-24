@@ -2,11 +2,12 @@ import bcrypt from "bcrypt";
 import User from "../models/user.model.js";
 
 export const updateUser = async (req, res) => {
-  if (req.user.id !== req.params.userId) {
+  if (req.user.id !== req.params.userId && req.user.role !== "admin") {
     return res
       .status(403)
       .json({ message: "You are not allowed to update this user" });
   }
+  const role = req.body.role || "user";
   if (req.body.password) {
     if (req.body.password.length < 6) {
       return res
@@ -44,6 +45,7 @@ export const updateUser = async (req, res) => {
           email: req.body.email,
           profilePicture: req.body.profilePicture,
           password: req.body.password,
+          role: role,
         },
       },
       { new: true }
