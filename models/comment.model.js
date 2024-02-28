@@ -30,6 +30,10 @@ const CommmentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// CommmentSchema.pre("save", function () {
+//   this.populate(["userId", "postId"]);
+// });
+
 const Comment = mongoose.model("Comment", CommmentSchema);
 
 export default Comment;

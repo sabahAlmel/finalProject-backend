@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import http from "http";
+import { Server } from "socket.io";
 import { userRouter } from "./routes/user.router.js";
 import { authRouter } from "./routes/auth.router.js";
 import postRouter from "./routes/post.router.js";
@@ -24,6 +26,27 @@ app.use("/comments", commentRouter);
 app.use("/category", categoryRouter);
 app.use("/subCategory", subCategoryRouter);
 
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    credentials: true,
+  },
+});
+io.on("connection", (socket) => {
+  socket.on("comment", (data) => {
+    if (!data.user) {
+      io.emit("delete-comment", data.comments);
+    } else {
+      io.emit("new-comment", data.comments);
+      io.emit("notification", {
+        user: data.user,
+        message: "commented on your article",
+      });
+    }
+  });
+});
+
 async function startServer() {
   mongoose.connection.once("open", () => {
     console.log("mongo is ready");
@@ -34,7 +57,7 @@ async function startServer() {
   });
   await mongoose.connect(process.env.MONGO_URI);
 
-  app.listen(process.env.PORT, () => {
+  server.listen(process.env.PORT, "0.0.0.0", () => {
     console.log("listening on port: " + process.env.PORT);
   });
 }

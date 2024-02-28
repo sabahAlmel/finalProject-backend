@@ -172,11 +172,13 @@ export const recommendedBySubCategories = async (req, res) => {
   try {
     const { subCategoryName, limit } = req.query;
 
-    const subCategory = await SubCategory.find({ name: subCategoryName });
-    const subCategoryId = subCategory[0]._id;
-    const mostRecommendedPosts = await Post.find({
-      subCategoryId: subCategoryId,
-    })
+    // const subCategory = await SubCategory.find({ name: subCategoryName });
+    // const subCategoryId = subCategory[0]._id;
+    const mostRecommendedPosts = await Post.find(
+      // {
+      // subCategoryId: subCategoryId,
+    // }
+    )
       .sort({ nbOfRecommendation: -1 })
       .limit(parseInt(limit));
     return res.status(200).json(mostRecommendedPosts);
