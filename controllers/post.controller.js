@@ -1,5 +1,5 @@
 import Post from "../models/post.model.js";
-import SubCategory from "../models/subcategory.model.js";
+import Category from "../models/category.model.js";
 
 export const create = async (req, res) => {
   if (!req.body.title || !req.body.description) {
@@ -168,17 +168,26 @@ export const recommendedPosts = async (req, res) => {
   }
 };
 
-export const recommendedBySubCategories = async (req, res) => {
+export const recommended = async (req, res) => {
   try {
-    const { subCategoryName, limit } = req.query;
+    const { limit } = req.query;
+    const mostRecommendedPosts = await Post.find()
+      .sort({ nbOfRecommendation: -1 })
+      .limit(parseInt(limit));
+    return res.status(200).json(mostRecommendedPosts);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    const message = error.message || "Internal Server Error";
+    return res.status(statusCode).json({ message: message });
+  }
+};
 
-    // const subCategory = await SubCategory.find({ name: subCategoryName });
-    // const subCategoryId = subCategory[0]._id;
-    const mostRecommendedPosts = await Post.find(
-      // {
-      // subCategoryId: subCategoryId,
-    // }
-    )
+export const recommendedByCategories = async (req, res) => {
+  try {
+    const { categoryId, limit } = req.query;
+    const mostRecommendedPosts = await Post.find({
+      categoryId: categoryId,
+    })
       .sort({ nbOfRecommendation: -1 })
       .limit(parseInt(limit));
     return res.status(200).json(mostRecommendedPosts);

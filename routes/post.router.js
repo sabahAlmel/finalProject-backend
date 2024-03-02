@@ -6,7 +6,8 @@ import {
   getPostByUserId,
   updatepost,
   recommendedPosts,
-  recommendedBySubCategories,
+  recommended,
+  recommendedByCategories,
 } from "../controllers/post.controller.js";
 import { authenticate } from "../middlewares/auth.middelwares.js";
 
@@ -16,7 +17,8 @@ postRouter.get("/getByUser/:userId", authenticate, getPostByUserId);
 postRouter.put("/recommended/:postId", authenticate, recommendedPosts);
 postRouter.post("/create", authenticate, create);
 postRouter.get("/getall", getposts);
-postRouter.get("/getRecommendedPost", recommendedBySubCategories);
+postRouter.get("/getRecommendedPost", recommended);
+postRouter.get("/getRecommendedByCategory", recommendedByCategories);
 postRouter.delete("/deletepost/:postId", authenticate, deletepost);
 postRouter.put("/updatepost/:postId", authenticate, updatepost);
 
