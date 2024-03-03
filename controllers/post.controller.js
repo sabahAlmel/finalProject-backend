@@ -97,7 +97,7 @@ export const updatepost = async (req, res) => {
   const post = await Post.find({ _id: req.params.postId });
   let userId = post[0].userId._id;
   userId = userId.toString();
-  if (req.user.role !== "admin" || req.user.id.toString() !== userId) {
+  if (req.user.role !== "admin" && req.user.id.toString() !== userId) {
     return res
       .status(403)
       .json({ message: "You are not allowed to update this post" });
