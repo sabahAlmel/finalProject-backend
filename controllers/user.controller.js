@@ -7,7 +7,8 @@ export const updateUser = async (req, res) => {
       .status(403)
       .json({ message: "You are not allowed to update this user" });
   }
-  const role = req.body.role || "user";
+
+  const role = req.user.role || "user";
   if (req.body.password) {
     if (req.body.password.length < 6) {
       return res
